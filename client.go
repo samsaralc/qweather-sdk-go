@@ -12,10 +12,10 @@ import (
 
 // Client represents the QWeather API client
 type Client struct {
-	BaseURL    string
-	Token      string
-	AuthType   AuthType
-	HTTPClient *http.Client
+	BaseURL    string       // API Host，例如 "https://devapi.qweather.com"。
+	Token      string       // 认证凭据。JWT 模式下传完整 Bearer Token，API Key 模式下传 API Key。
+	AuthType   AuthType     // 认证方式，支持 JWT 和 API Key。
+	HTTPClient *http.Client // 底层 HTTP 客户端，可用于自定义超时、代理等行为。
 }
 
 // AuthType represents the authentication type
@@ -28,10 +28,10 @@ const (
 
 // Config holds the configuration for the QWeather client
 type Config struct {
-	Host     string        // API基础URL，默认: "https://devapi.qweather.com"
-	Token    string        // JWT Token 或 API Key
-	AuthType AuthType      // 认证方式：JWT 或 API Key，默认为JWT
-	Timeout  time.Duration // HTTP请求超时时间，默认: 30秒
+	Host     string        // API Host，默认 "https://devapi.qweather.com"；也可传入自定义网关域名。
+	Token    string        // 认证凭据。JWT 模式对应文档中的完整 JWT，API Key 模式对应控制台生成的 Key。
+	AuthType AuthType      // 认证方式。SDK 5+ 推荐使用 JWT；未设置或非法值时默认使用 JWT。
+	Timeout  time.Duration // HTTP 请求超时时间，默认 30 秒。
 }
 
 // NewClient creates a new QWeather API client
