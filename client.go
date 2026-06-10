@@ -2,6 +2,7 @@ package qweather
 
 import (
 	"compress/gzip"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -66,7 +67,7 @@ func NewClient(config Config) *Client {
 }
 
 // makeRequest performs HTTP request with authentication
-func (c *Client) makeRequest(endpoint string, params url.Values) ([]byte, error) {
+func (c *Client) makeRequest(ctx context.Context, endpoint string, params url.Values) ([]byte, error) {
 	if c.Token == "" {
 		return nil, fmt.Errorf("API token is required")
 	}
@@ -78,7 +79,7 @@ func (c *Client) makeRequest(endpoint string, params url.Values) ([]byte, error)
 
 	u.RawQuery = params.Encode()
 
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}

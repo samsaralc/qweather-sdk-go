@@ -1,6 +1,7 @@
 package qweather
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -9,9 +10,10 @@ import (
 )
 
 // GetWeatherNow retrieves current weather data for cities
+// ctx: request context for cancellation and per-request timeout
 // location: LocationID (e.g., "101010100") or longitude,latitude coordinates (e.g., "116.41,39.92")
 // options: optional parameters for language and unit settings
-func (c *Client) GetWeatherNow(location string, options ...WeatherNowOptions) (*WeatherNowResponse, error) {
+func (c *Client) GetWeatherNow(ctx context.Context, location string, options ...WeatherNowOptions) (*WeatherNowResponse, error) {
 	if location == "" {
 		return nil, fmt.Errorf("location is required")
 	}
@@ -35,7 +37,7 @@ func (c *Client) GetWeatherNow(location string, options ...WeatherNowOptions) (*
 		}
 	}
 
-	body, err := c.makeRequest("/v7/weather/now", params)
+	body, err := c.makeRequest(ctx, "/v7/weather/now", params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get weather now: %w", err)
 	}
@@ -72,17 +74,17 @@ func isValidLocationIDOrCoordinate(location string) bool {
 }
 
 // GetWeatherNowWithLocationID is a convenience method for using LocationID
-func (c *Client) GetWeatherNowWithLocationID(locationID string, options ...WeatherNowOptions) (*WeatherNowResponse, error) {
+func (c *Client) GetWeatherNowWithLocationID(ctx context.Context, locationID string, options ...WeatherNowOptions) (*WeatherNowResponse, error) {
 	// Validate LocationID format
 	if matched, _ := regexp.MatchString(`^\d{6,12}$`, locationID); !matched {
 		return nil, fmt.Errorf("invalid LocationID format, expected numeric string (e.g., '101010100')")
 	}
 
-	return c.GetWeatherNow(locationID, options...)
+	return c.GetWeatherNow(ctx, locationID, options...)
 }
 
 // GetWeatherNowWithCoordinates is a convenience method for using coordinates
-func (c *Client) GetWeatherNowWithCoordinates(longitude, latitude float64, options ...WeatherNowOptions) (*WeatherNowResponse, error) {
+func (c *Client) GetWeatherNowWithCoordinates(ctx context.Context, longitude, latitude float64, options ...WeatherNowOptions) (*WeatherNowResponse, error) {
 	location := fmt.Sprintf("%.2f,%.2f", longitude, latitude)
-	return c.GetWeatherNow(location, options...)
+	return c.GetWeatherNow(ctx, location, options...)
 }

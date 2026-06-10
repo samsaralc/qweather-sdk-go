@@ -1,6 +1,7 @@
 package qweather
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -8,9 +9,10 @@ import (
 )
 
 // GetGridWeatherNow retrieves current grid weather data
+// ctx: request context for cancellation and per-request timeout
 // location: longitude,latitude coordinates (e.g., "116.41,39.92")
 // options: optional parameters for language and unit settings
-func (c *Client) GetGridWeatherNow(location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
+func (c *Client) GetGridWeatherNow(ctx context.Context, location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
 	if location == "" {
 		return nil, fmt.Errorf("location is required")
 	}
@@ -34,7 +36,7 @@ func (c *Client) GetGridWeatherNow(location string, options ...GridWeatherNowOpt
 		}
 	}
 
-	body, err := c.makeRequest("/v7/grid-weather/now", params)
+	body, err := c.makeRequest(ctx, "/v7/grid-weather/now", params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grid weather now: %w", err)
 	}
@@ -66,7 +68,7 @@ func isValidLocation(location string) bool {
 }
 
 // GetGridWeatherNowWithCoordinates is a convenience method that takes separate longitude and latitude
-func (c *Client) GetGridWeatherNowWithCoordinates(longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
+func (c *Client) GetGridWeatherNowWithCoordinates(ctx context.Context, longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
 	location := fmt.Sprintf("%.2f,%.2f", longitude, latitude)
-	return c.GetGridWeatherNow(location, options...)
+	return c.GetGridWeatherNow(ctx, location, options...)
 } 

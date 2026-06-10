@@ -35,6 +35,7 @@ go get github.com/samsaralc/qweather-sdk-go
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     
@@ -56,7 +57,7 @@ func main() {
 
     // 获取北京的格点天气数据
     location := "116.41,39.92"
-    response, err := client.GetGridWeatherNow(location)
+    response, err := client.GetGridWeatherNow(context.Background(), location)
     if err != nil {
         log.Fatalf("获取天气数据失败: %v", err)
     }
@@ -72,6 +73,7 @@ func main() {
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     
@@ -91,7 +93,7 @@ func main() {
 
     // 获取天气数据
     location := "116.41,39.92"
-    response, err := client.GetGridWeatherNow(location)
+    response, err := client.GetGridWeatherNow(context.Background(), location)
     if err != nil {
         log.Fatalf("获取天气数据失败: %v", err)
     }
@@ -141,10 +143,11 @@ func NewClient(config Config) *Client
 获取指定坐标的格点实时天气数据。
 
 ```go
-func (c *Client) GetGridWeatherNow(location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
+func (c *Client) GetGridWeatherNow(ctx context.Context, location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
 ```
 
 **参数:**
+- `ctx`: 请求上下文，用于取消请求或设置单次请求超时
 - `location`: 经纬度坐标字符串，格式为 "经度,纬度"，例如 "116.41,39.92"
 - `options`: 可选参数，包括语言和单位设置
 
@@ -157,10 +160,11 @@ func (c *Client) GetGridWeatherNow(location string, options ...GridWeatherNowOpt
 使用分离的经纬度数值获取格点实时天气数据的便利方法。
 
 ```go
-func (c *Client) GetGridWeatherNowWithCoordinates(longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
+func (c *Client) GetGridWeatherNowWithCoordinates(ctx context.Context, longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
 ```
 
 **参数:**
+- `ctx`: 请求上下文，用于取消请求或设置单次请求超时
 - `longitude`: 经度
 - `latitude`: 纬度
 - `options`: 可选参数
@@ -209,34 +213,47 @@ type WeatherNow struct {
 
 ```go
 // 使用位置字符串
+ctx := context.Background()
 location := "116.41,39.92"
-response, err := client.GetGridWeatherNow(location)
+response, err := client.GetGridWeatherNow(ctx, location)
 ```
 
 ### 使用经纬度数值
 
 ```go
 // 使用分离的经纬度
+ctx := context.Background()
 longitude := 116.41
 latitude := 39.92
-response, err := client.GetGridWeatherNowWithCoordinates(longitude, latitude)
+response, err := client.GetGridWeatherNowWithCoordinates(ctx, longitude, latitude)
 ```
 
 ### 使用可选参数
 
 ```go
 // 设置语言和单位
+ctx := context.Background()
 options := qweather.GridWeatherNowOptions{
     Lang: "en", // 英文
     Unit: "i",  // 英制单位
 }
-response, err := client.GetGridWeatherNow(location, options)
+response, err := client.GetGridWeatherNow(ctx, location, options)
+```
+
+### 请求超时与取消
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+defer cancel()
+
+response, err := client.GetGridWeatherNow(ctx, location)
 ```
 
 ### 错误处理
 
 ```go
-response, err := client.GetGridWeatherNow(location)
+ctx := context.Background()
+response, err := client.GetGridWeatherNow(ctx, location)
 if err != nil {
     // 检查是否是API错误
     if apiErr, ok := err.(qweather.Error); ok {
@@ -278,12 +295,13 @@ client := qweather.NewClientWithAPIKey("your_api_key")
 
 ## 注意事项
 
-1. **认证凭据**: 使用前请确保已设置有效的JWT Token或API Key
-2. **认证方式**: 推荐使用JWT认证以获得更高的安全性
-3. **坐标格式**: 经纬度坐标支持最多2位小数，格式为 "经度,纬度"
-4. **时区**: 格点天气数据采用UTC 0时区表示时间
-5. **数据来源**: 格点天气基于数值预报模型，不适宜与观测站数据对比
-6. **分辨率**: 格点天气数据分辨率为3-5公里
+1. **Context**: 所有 API 方法均接受 `context.Context` 作为第一个参数，可用于请求取消和单次超时控制；`Config.Timeout` 仍作为客户端级别的默认超时
+2. **认证凭据**: 使用前请确保已设置有效的JWT Token或API Key
+3. **认证方式**: 推荐使用JWT认证以获得更高的安全性
+4. **坐标格式**: 经纬度坐标支持最多2位小数，格式为 "经度,纬度"
+5. **时区**: 格点天气数据采用UTC 0时区表示时间
+6. **数据来源**: 格点天气基于数值预报模型，不适宜与观测站数据对比
+7. **分辨率**: 格点天气数据分辨率为3-5公里
 
 ## 状态码说明
 
