@@ -35,7 +35,6 @@ go get github.com/samsaralc/qweather-sdk-go
 package main
 
 import (
-    "context"
     "fmt"
     "log"
     
@@ -57,7 +56,7 @@ func main() {
 
     // 获取北京的格点天气数据
     location := "116.41,39.92"
-    response, err := client.GetGridWeatherNow(context.Background(), location)
+    response, err := client.GetGridWeatherNow(location)
     if err != nil {
         log.Fatalf("获取天气数据失败: %v", err)
     }
@@ -73,7 +72,6 @@ func main() {
 package main
 
 import (
-    "context"
     "fmt"
     "log"
     
@@ -93,7 +91,7 @@ func main() {
 
     // 获取天气数据
     location := "116.41,39.92"
-    response, err := client.GetGridWeatherNow(context.Background(), location)
+    response, err := client.GetGridWeatherNow(location)
     if err != nil {
         log.Fatalf("获取天气数据失败: %v", err)
     }
@@ -140,14 +138,21 @@ func NewClient(config Config) *Client
 
 #### GetGridWeatherNow
 
-获取指定坐标的格点实时天气数据。
+获取指定坐标的格点实时天气数据（v1 兼容，无需传入 context）。
 
 ```go
-func (c *Client) GetGridWeatherNow(ctx context.Context, location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
+func (c *Client) GetGridWeatherNow(location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
+```
+
+#### GetGridWeatherNowWithContext
+
+支持上游 context 透传，可用于请求取消和单次超时控制。
+
+```go
+func (c *Client) GetGridWeatherNowWithContext(ctx context.Context, location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
 ```
 
 **参数:**
-- `ctx`: 请求上下文，用于取消请求或设置单次请求超时
 - `location`: 经纬度坐标字符串，格式为 "经度,纬度"，例如 "116.41,39.92"
 - `options`: 可选参数，包括语言和单位设置
 
@@ -160,11 +165,11 @@ func (c *Client) GetGridWeatherNow(ctx context.Context, location string, options
 使用分离的经纬度数值获取格点实时天气数据的便利方法。
 
 ```go
-func (c *Client) GetGridWeatherNowWithCoordinates(ctx context.Context, longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
+func (c *Client) GetGridWeatherNowWithCoordinates(longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
+func (c *Client) GetGridWeatherNowWithCoordinatesWithContext(ctx context.Context, longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error)
 ```
 
 **参数:**
-- `ctx`: 请求上下文，用于取消请求或设置单次请求超时
 - `longitude`: 经度
 - `latitude`: 纬度
 - `options`: 可选参数
@@ -212,48 +217,46 @@ type WeatherNow struct {
 ### 基础调用
 
 ```go
-// 使用位置字符串
-ctx := context.Background()
+// 使用位置字符串（v1 兼容）
 location := "116.41,39.92"
-response, err := client.GetGridWeatherNow(ctx, location)
+response, err := client.GetGridWeatherNow(location)
 ```
 
 ### 使用经纬度数值
 
 ```go
 // 使用分离的经纬度
-ctx := context.Background()
 longitude := 116.41
 latitude := 39.92
-response, err := client.GetGridWeatherNowWithCoordinates(ctx, longitude, latitude)
+response, err := client.GetGridWeatherNowWithCoordinates(longitude, latitude)
 ```
 
 ### 使用可选参数
 
 ```go
 // 设置语言和单位
-ctx := context.Background()
 options := qweather.GridWeatherNowOptions{
     Lang: "en", // 英文
     Unit: "i",  // 英制单位
 }
-response, err := client.GetGridWeatherNow(ctx, location, options)
+response, err := client.GetGridWeatherNow(location, options)
 ```
 
 ### 请求超时与取消
+
+需要上游 context 控制时，使用 `*WithContext` 方法：
 
 ```go
 ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 defer cancel()
 
-response, err := client.GetGridWeatherNow(ctx, location)
+response, err := client.GetGridWeatherNowWithContext(ctx, location)
 ```
 
 ### 错误处理
 
 ```go
-ctx := context.Background()
-response, err := client.GetGridWeatherNow(ctx, location)
+response, err := client.GetGridWeatherNow(location)
 if err != nil {
     // 检查是否是API错误
     if apiErr, ok := err.(qweather.Error); ok {
@@ -295,7 +298,7 @@ client := qweather.NewClientWithAPIKey("your_api_key")
 
 ## 注意事项
 
-1. **Context**: 所有 API 方法均接受 `context.Context` 作为第一个参数，可用于请求取消和单次超时控制；`Config.Timeout` 仍作为客户端级别的默认超时
+1. **Context**: v1 API（如 `GetGridWeatherNow`）保持向后兼容；需要上游超时/取消时使用对应的 `*WithContext` 方法；`Config.Timeout` 仍作为客户端级别的默认超时
 2. **认证凭据**: 使用前请确保已设置有效的JWT Token或API Key
 3. **认证方式**: 推荐使用JWT认证以获得更高的安全性
 4. **坐标格式**: 经纬度坐标支持最多2位小数，格式为 "经度,纬度"

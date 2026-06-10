@@ -18,7 +18,7 @@ func TestWeatherNow(t *testing.T) {
 	// 测试1: 使用LocationID获取实时天气
 	fmt.Println("\n--- 测试1: 使用LocationID ---")
 	locationID := "101010100" // 北京的LocationID
-	response, err := client.GetWeatherNow(t.Context(), locationID)
+	response, err := client.GetWeatherNow(locationID)
 	if err != nil {
 		log.Printf("获取实时天气数据失败: %v", err)
 	} else {
@@ -28,7 +28,7 @@ func TestWeatherNow(t *testing.T) {
 	// 测试2: 使用LocationID便利方法
 	fmt.Println("\n--- 测试2: 使用LocationID便利方法 ---")
 	shanghaiID := "101020100" // 上海的LocationID
-	response2, err := client.GetWeatherNowWithLocationID(t.Context(), shanghaiID)
+	response2, err := client.GetWeatherNowWithLocationID(shanghaiID)
 	if err != nil {
 		log.Printf("获取实时天气数据失败: %v", err)
 	} else {
@@ -38,7 +38,7 @@ func TestWeatherNow(t *testing.T) {
 	// 测试3: 使用经纬度坐标获取实时天气
 	fmt.Println("\n--- 测试3: 使用经纬度坐标 ---")
 	coordinates := "116.41,39.92" // 北京的经纬度
-	response3, err := client.GetWeatherNow(t.Context(), coordinates)
+	response3, err := client.GetWeatherNow(coordinates)
 	if err != nil {
 		log.Printf("获取实时天气数据失败: %v", err)
 	} else {
@@ -49,7 +49,7 @@ func TestWeatherNow(t *testing.T) {
 	fmt.Println("\n--- 测试4: 使用经纬度数值 ---")
 	longitude := 121.47
 	latitude := 31.23
-	response4, err := client.GetWeatherNowWithCoordinates(t.Context(), longitude, latitude)
+	response4, err := client.GetWeatherNowWithCoordinates(longitude, latitude)
 	if err != nil {
 		log.Printf("获取实时天气数据失败: %v", err)
 	} else {
@@ -62,7 +62,7 @@ func TestWeatherNow(t *testing.T) {
 		Lang: "en", // 英文
 		Unit: "i",  // 英制单位
 	}
-	response5, err := client.GetWeatherNow(t.Context(), locationID, options)
+	response5, err := client.GetWeatherNow(locationID, options)
 	if err != nil {
 		log.Printf("获取实时天气数据失败: %v", err)
 	} else {
@@ -72,7 +72,7 @@ func TestWeatherNow(t *testing.T) {
 	// 测试6: 错误处理 - 无效的LocationID格式
 	fmt.Println("\n--- 测试6: 错误处理测试 ---")
 	invalidLocationID := "invalid_id"
-	_, err = client.GetWeatherNowWithLocationID(t.Context(), invalidLocationID)
+	_, err = client.GetWeatherNowWithLocationID(invalidLocationID)
 	if err != nil {
 		fmt.Printf("期望的错误: %v\n", err)
 	}
@@ -80,7 +80,7 @@ func TestWeatherNow(t *testing.T) {
 	// 测试7: 错误处理 - 无效的位置格式
 	fmt.Println("\n--- 测试7: 无效位置格式测试 ---")
 	invalidLocation := "invalid_location"
-	_, err = client.GetWeatherNow(t.Context(), invalidLocation)
+	_, err = client.GetWeatherNow(invalidLocation)
 	if err != nil {
 		fmt.Printf("期望的错误: %v\n", err)
 	}
@@ -88,7 +88,7 @@ func TestWeatherNow(t *testing.T) {
 	// 测试8: 使用API Key认证
 	fmt.Println("\n--- 测试8: API Key认证 ---")
 	clientAPIKey := qweather.NewClientWithAPIKey("your_api_key_here", "your_host_here")
-	response8, err := clientAPIKey.GetWeatherNow(t.Context(), locationID)
+	response8, err := clientAPIKey.GetWeatherNow(locationID)
 	if err != nil {
 		log.Printf("API Key认证失败: %v", err)
 	} else {

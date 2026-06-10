@@ -8,11 +8,16 @@ import (
 	"regexp"
 )
 
-// GetGridWeatherNow retrieves current grid weather data
-// ctx: request context for cancellation and per-request timeout
+// GetGridWeatherNow retrieves current grid weather data.
 // location: longitude,latitude coordinates (e.g., "116.41,39.92")
 // options: optional parameters for language and unit settings
-func (c *Client) GetGridWeatherNow(ctx context.Context, location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
+func (c *Client) GetGridWeatherNow(location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
+	return c.GetGridWeatherNowWithContext(context.Background(), location, options...)
+}
+
+// GetGridWeatherNowWithContext retrieves current grid weather data with context support.
+// ctx: request context for cancellation and per-request timeout
+func (c *Client) GetGridWeatherNowWithContext(ctx context.Context, location string, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
 	if location == "" {
 		return nil, fmt.Errorf("location is required")
 	}
@@ -68,7 +73,12 @@ func isValidLocation(location string) bool {
 }
 
 // GetGridWeatherNowWithCoordinates is a convenience method that takes separate longitude and latitude
-func (c *Client) GetGridWeatherNowWithCoordinates(ctx context.Context, longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
+func (c *Client) GetGridWeatherNowWithCoordinates(longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
+	return c.GetGridWeatherNowWithCoordinatesWithContext(context.Background(), longitude, latitude, options...)
+}
+
+// GetGridWeatherNowWithCoordinatesWithContext is a convenience method with context support.
+func (c *Client) GetGridWeatherNowWithCoordinatesWithContext(ctx context.Context, longitude, latitude float64, options ...GridWeatherNowOptions) (*GridWeatherNowResponse, error) {
 	location := fmt.Sprintf("%.2f,%.2f", longitude, latitude)
-	return c.GetGridWeatherNow(ctx, location, options...)
-} 
+	return c.GetGridWeatherNowWithContext(ctx, location, options...)
+}

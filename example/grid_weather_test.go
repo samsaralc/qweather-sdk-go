@@ -18,7 +18,7 @@ func TestGridWeatherNow(t *testing.T) {
 	// 测试1: 使用经纬度字符串获取格点天气
 	fmt.Println("\n--- 测试1: 使用位置字符串 ---")
 	location := "116.41,39.92" // 北京的经纬度
-	response, err := client.GetGridWeatherNow(t.Context(), location)
+	response, err := client.GetGridWeatherNow(location)
 	if err != nil {
 		log.Printf("获取格点天气数据失败: %v", err)
 	} else {
@@ -29,7 +29,7 @@ func TestGridWeatherNow(t *testing.T) {
 	fmt.Println("\n--- 测试2: 使用经纬度数值 ---")
 	longitude := 121.47
 	latitude := 31.23
-	response2, err := client.GetGridWeatherNowWithCoordinates(t.Context(), longitude, latitude)
+	response2, err := client.GetGridWeatherNowWithCoordinates(longitude, latitude)
 	if err != nil {
 		log.Printf("获取格点天气数据失败: %v", err)
 	} else {
@@ -42,7 +42,7 @@ func TestGridWeatherNow(t *testing.T) {
 		Lang: "en", // 英文
 		Unit: "i",  // 英制单位
 	}
-	response3, err := client.GetGridWeatherNow(t.Context(), location, options)
+	response3, err := client.GetGridWeatherNow(location, options)
 	if err != nil {
 		log.Printf("获取格点天气数据失败: %v", err)
 	} else {
@@ -52,7 +52,7 @@ func TestGridWeatherNow(t *testing.T) {
 	// 测试4: 错误处理 - 无效的坐标格式
 	fmt.Println("\n--- 测试4: 错误处理测试 ---")
 	invalidLocation := "invalid_coordinates"
-	_, err = client.GetGridWeatherNow(t.Context(), invalidLocation)
+	_, err = client.GetGridWeatherNow(invalidLocation)
 	if err != nil {
 		fmt.Printf("期望的错误: %v\n", err)
 	}
@@ -60,7 +60,7 @@ func TestGridWeatherNow(t *testing.T) {
 	// 测试5: 使用API Key认证
 	fmt.Println("\n--- 测试5: API Key认证 ---")
 	clientAPIKey := qweather.NewClientWithAPIKey("your_api_key_here", "your_host_here")
-	response5, err := clientAPIKey.GetGridWeatherNow(t.Context(), location)
+	response5, err := clientAPIKey.GetGridWeatherNow(location)
 	if err != nil {
 		log.Printf("API Key认证失败: %v", err)
 	} else {

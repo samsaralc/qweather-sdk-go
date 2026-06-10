@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"testing"
@@ -49,7 +48,7 @@ func testJWTAuthentication() {
 
 	// 测试API调用
 	location := "116.41,39.92"
-	response, err := client.GetGridWeatherNow(context.Background(), location)
+	response, err := client.GetGridWeatherNow(location)
 	if err != nil {
 		log.Printf("JWT认证API调用失败: %v", err)
 	} else {
@@ -71,7 +70,7 @@ func testAPIKeyAuthentication() {
 
 	// 测试API调用
 	locationID := "101010100"
-	response, err := client.GetWeatherNow(context.Background(), locationID)
+	response, err := client.GetWeatherNow(locationID)
 	if err != nil {
 		log.Printf("API Key认证API调用失败: %v", err)
 	} else {
@@ -127,7 +126,7 @@ func testAuthenticationComparison() {
 	// JWT认证测试
 	jwtClient := qweather.NewClientWithJWT("your_jwt_token_here", "your_host_here")
 	fmt.Println("JWT认证测试:")
-	response1, err1 := jwtClient.GetGridWeatherNow(context.Background(), location)
+	response1, err1 := jwtClient.GetGridWeatherNow(location)
 	if err1 != nil {
 		fmt.Printf("  JWT认证失败: %v\n", err1)
 	} else {
@@ -137,7 +136,7 @@ func testAuthenticationComparison() {
 	// API Key认证测试
 	apiClient := qweather.NewClientWithAPIKey("your_api_key_here", "your_api_key_host_here")
 	fmt.Println("API Key认证测试:")
-	response2, err2 := apiClient.GetGridWeatherNow(context.Background(), location)
+	response2, err2 := apiClient.GetGridWeatherNow(location)
 	if err2 != nil {
 		fmt.Printf("  API Key认证失败: %v\n", err2)
 	} else {
@@ -163,7 +162,7 @@ func testAuthenticationErrors() {
 	}
 
 	emptyClient := qweather.NewClient(emptyConfig)
-	_, err := emptyClient.GetGridWeatherNow(context.Background(), "116.41,39.92")
+	_, err := emptyClient.GetGridWeatherNow("116.41,39.92")
 	if err != nil {
 		fmt.Printf("  期望的错误: %v\n", err)
 	}
